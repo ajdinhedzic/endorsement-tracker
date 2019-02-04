@@ -1,6 +1,8 @@
 /target/
 !.mvn/wrapper/maven-wrapper.jar
-/node_modules
+node_modules/
+node/
+front-end/build
 .DS_Store
 
 
