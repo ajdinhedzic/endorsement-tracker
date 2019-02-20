@@ -1,5 +1,4 @@
 import React from "react";
-import Page from "../../main/components/Page";
 
 import {configure, shallow} from "enzyme";
 import Adapter from 'enzyme-adapter-react-16';
