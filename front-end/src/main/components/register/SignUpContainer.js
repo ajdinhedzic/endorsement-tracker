@@ -3,6 +3,8 @@ import SignUp from "./Signup";
 import {connect} from "react-redux";
 import {signUpAction} from "../../actions/signUpAction";
 import PropTypes from 'prop-types';
+import {Redirect} from "react-router-dom";
+import {DASHBOARD} from "../../consts/routes";
 
 export class SignUpContainer extends React.Component {
     render() {
@@ -12,9 +14,9 @@ export class SignUpContainer extends React.Component {
                     <div className="col-md-5">
                         <div className="card" style={{marginTop: '25%'}}>
                             <div className="card-body">
-                                {this.props.isLoading && <h1>is loading</h1>}
                                 {this.props.hasError && <h1>Error</h1>}
-                                <SignUp formSubmit={this.props.signUp}/>
+                                <SignUp formSubmit={this.props.signUp} isLoading={this.props.isLoading}/>
+                                {this.props.signUpSuccess && <Redirect to={{pathname: DASHBOARD}} />}
                             </div>
                         </div>
                     </div>

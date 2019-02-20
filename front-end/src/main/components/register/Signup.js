@@ -10,6 +10,10 @@ class SignUp extends React.Component {
     setEmail = event => this.setState({email: event.target.value});
     setPassword = event => this.setState({password: event.target.value});
     submitForm = () => this.props.formSubmit(this.state.email, this.state.password);
+    renderButton = () => {
+        return this.props.isLoading ? <button className="btn btn-light w-100" type="submit">Loading...</button>
+            : <button className="btn btn-primary w-100" onClick={this.submitForm} type="submit">Create Account</button>
+    };
 
     render() {
         return (
@@ -30,10 +34,7 @@ class SignUp extends React.Component {
                             data.
                         </small>
                     </div>
-                    <button className="btn btn-primary w-100"
-                            onClick={this.submitForm}
-                            type="submit">Create Account
-                    </button>
+                    {this.renderButton()}
                 </form>
             </div>
         )

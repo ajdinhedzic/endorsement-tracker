@@ -3,9 +3,10 @@ import Page from "../../main/components/Page";
 import {configure, shallow} from "enzyme";
 import Adapter from 'enzyme-adapter-react-16';
 import {BrowserRouter, Link, Route, Router} from "react-router-dom";
-import {MAINPAGE, SIGNUP} from "../../main/consts/routes";
+import {DASHBOARD, MAINPAGE, SIGNUP} from "../../main/consts/routes";
 import SignUpContainer from "../../main/components/register/SignUpContainer";
 import MainPage from "../../main/components/MainPage";
+import DashboardContainer from "../../main/components/dashboard/DashboardContainer";
 
 describe('PageContent Content', function () {
 
@@ -29,6 +30,12 @@ describe('PageContent Content', function () {
             const component = shallow(<Page/>);
             expect(component.find(Route).at(1).props().path).toBe(SIGNUP);
             expect(component.find(Route).at(1).props().component).toBe(SignUpContainer);
+        });
+
+        it('has a route to dashboard', function () {
+            const component = shallow(<Page/>);
+            expect(component.find(Route).at(2).props().path).toBe(DASHBOARD);
+            expect(component.find(Route).at(2).props().component).toBe(DashboardContainer);
         });
     });
 });
