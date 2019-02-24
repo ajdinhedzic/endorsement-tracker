@@ -1,6 +1,13 @@
 spring:
-  profiles:
-    active: @spring.profiles.active@
   h2:
     console:
       enabled: true
+  profiles:
+    active: @spring.profiles.active@
+  jpa:
+    generate-ddl: true
+    hibernate:
+      ddl-auto: update
+application:
+  jwt:
+    secret: tempsecret

@@ -1,0 +1,6 @@
+spring:
+  datasource:
+    schema: endorsements
+application:
+  jwt:
+    secret: tempsecret

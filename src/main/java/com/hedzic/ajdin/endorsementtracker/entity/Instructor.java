@@ -3,6 +3,7 @@ package com.hedzic.ajdin.endorsementtracker.entity;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.Table;
 
 @Entity
 public class Instructor {
@@ -12,9 +13,8 @@ public class Instructor {
     private String name;
     private String emailAddress;
 
-    public Instructor(){
+    protected Instructor(){
     }
-
 
     public String getName() {
         return name;

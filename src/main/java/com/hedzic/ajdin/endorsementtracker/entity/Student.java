@@ -1,9 +1,6 @@
 package com.hedzic.ajdin.endorsementtracker.entity;
 
-import javax.persistence.Entity;
-import javax.persistence.ForeignKey;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
+import javax.persistence.*;
 
 @Entity
 public class Student {
@@ -12,7 +9,7 @@ public class Student {
     private Long id;
     private String name;
 
-    private Student(){
+    protected Student(){
     }
 
     public Long getId() {

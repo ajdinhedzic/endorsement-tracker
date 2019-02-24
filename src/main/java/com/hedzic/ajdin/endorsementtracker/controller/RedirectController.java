@@ -8,7 +8,7 @@ import static com.hedzic.ajdin.endorsementtracker.config.SpringProfile.PRODUCTIO
 
 @Controller
 @Profile({PRODUCTION})
-public class HomeProductionController {
+public class RedirectController {
 
     @GetMapping("/private")
     public String redirectToRoot() {
