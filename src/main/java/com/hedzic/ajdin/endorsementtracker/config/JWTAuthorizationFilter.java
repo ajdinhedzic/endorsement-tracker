@@ -1,6 +1,7 @@
 package com.hedzic.ajdin.endorsementtracker.config;
 
-import io.jsonwebtoken.Jwts;
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.algorithms.Algorithm;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -44,10 +45,9 @@ public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
     private UsernamePasswordAuthenticationToken getAuthentication(HttpServletRequest request) {
         String token = request.getHeader(HEADER_STRING);
         if (token != null) {
-            String user = Jwts.parser()
-                    .setSigningKey(jwtEncryptionKey.getBytes())
-                    .parseClaimsJws(token.replace(TOKEN_PREFIX, ""))
-                    .getBody()
+            String user = JWT.require(Algorithm.HMAC512(jwtEncryptionKey.getBytes()))
+                    .build()
+                    .verify(token.replace(TOKEN_PREFIX, ""))
                     .getSubject();
 
             if (user != null) {

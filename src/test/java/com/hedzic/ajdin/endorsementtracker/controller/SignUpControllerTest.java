@@ -1,20 +1,25 @@
 package com.hedzic.ajdin.endorsementtracker.controller;
 
+import com.hedzic.ajdin.endorsementtracker.entity.Pilot;
 import com.hedzic.ajdin.endorsementtracker.entity.UserAccount;
 import com.hedzic.ajdin.endorsementtracker.domain.UserAuthentication;
-import com.hedzic.ajdin.endorsementtracker.service.AppUserDetailsService;
+import com.hedzic.ajdin.endorsementtracker.service.UserDetailsServiceImpl;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -27,7 +32,7 @@ public class SignUpControllerTest {
     private SignUpController signUpController;
 
     @Mock
-    private AppUserDetailsService userDetailsService;
+    private UserDetailsServiceImpl userDetailsService;
 
     @Before
     public void setup() {
@@ -36,6 +41,7 @@ public class SignUpControllerTest {
 
     @Test
     public void signUpRouteReturnsCreated() throws Exception {
+        when(userDetailsService.signUp(any(UserAccount.class))).thenReturn(new Pilot());
         mockMvc.perform(post("/api/signup")
                 .contentType("application/json")
                 .content("{\"email\":\"hello@hello.com\", \"password\":\"admin\"}"))
@@ -61,13 +67,24 @@ public class SignUpControllerTest {
 
     @Test
     public void signUpCallsAuthRepositoryWithUserCredentials() throws Exception {
-        UserAuthentication userAuthorization = new UserAuthentication();
-        userAuthorization.setEmail("email@email");
-        userAuthorization.setPassword("pass");
-        signUpController.signup(userAuthorization);
+        signUpController.signup(createUserAuthentication());
         ArgumentCaptor<UserAccount> userDetailsCaptor = ArgumentCaptor.forClass(UserAccount.class);
         verify(userDetailsService).signUp(userDetailsCaptor.capture());
         assertEquals("email@email", userDetailsCaptor.getValue().getEmail());
         assertEquals("pass", userDetailsCaptor.getValue().getPassword());
+    }
+
+    @Test
+    public void signUpReturns409ConflictWhenServiceReturnsNull() throws Exception {
+        ResponseEntity response = signUpController.signup(createUserAuthentication());
+        assertEquals(HttpStatus.CONFLICT, response.getStatusCode());
+
+    }
+
+    private UserAuthentication createUserAuthentication() {
+        UserAuthentication userAuthorization = new UserAuthentication();
+        userAuthorization.setEmail("email@email");
+        userAuthorization.setPassword("pass");
+        return userAuthorization;
     }
 }

@@ -1,38 +1,18 @@
 package com.hedzic.ajdin.endorsementtracker.entity;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
+import java.util.List;
 
 @Entity
-public class Instructor {
+public class Instructor extends Pilot {
+
     @Id
     @GeneratedValue
     private Long id;
-    private String name;
-    private String emailAddress;
 
-    protected Instructor(){
-    }
+    @OneToMany
+    private List<Pilot> students;
 
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getEmailAddress() {
-        return emailAddress;
-    }
-
-    public void setEmailAddress(String emailAddress) {
-        this.emailAddress = emailAddress;
-    }
-
-    public Long getId() {
-        return id;
+    public Instructor(){
     }
 }

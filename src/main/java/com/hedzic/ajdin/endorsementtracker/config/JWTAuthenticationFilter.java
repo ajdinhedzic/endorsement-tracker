@@ -1,9 +1,9 @@
 package com.hedzic.ajdin.endorsementtracker.config;
 
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.algorithms.Algorithm;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hedzic.ajdin.endorsementtracker.domain.UserAuthentication;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -21,8 +21,6 @@ import java.util.Date;
 
 public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
     private static final long THIRTY_MINUTES = 750_000;
-    private static final String TOKEN_PREFIX = "Bearer ";
-    private static final String HEADER_STRING = "Authorization";
 
     private final String jwtEncryptionKey;
     private final AuthenticationManager authenticationManager;
@@ -50,11 +48,10 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
                                             FilterChain chain,
                                             Authentication auth) throws IOException, ServletException {
 
-        String token = Jwts.builder()
-                .setSubject(((User) auth.getPrincipal()).getUsername())
-                .setExpiration(new Date(System.currentTimeMillis() + THIRTY_MINUTES))
-                .signWith(SignatureAlgorithm.HS512, jwtEncryptionKey.getBytes())
-                .compact();
-        response.addHeader(HEADER_STRING, TOKEN_PREFIX + token);
+        String token = JWT.create()
+                .withSubject(((User) auth.getPrincipal()).getUsername())
+                .withExpiresAt(new Date(System.currentTimeMillis() + THIRTY_MINUTES))
+                .sign(Algorithm.HMAC512(jwtEncryptionKey.getBytes()));
+        response.addHeader("Authorization", "Bearer " + token);
     }
 }
