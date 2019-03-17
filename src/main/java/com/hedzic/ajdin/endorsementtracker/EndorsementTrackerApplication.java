@@ -10,14 +10,14 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 @EnableJpaRepositories
 public class EndorsementTrackerApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(EndorsementTrackerApplication.class, args);
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(EndorsementTrackerApplication.class, args);
+    }
 
-	@Bean
-	public BCryptPasswordEncoder bCryptPasswordEncoder(){
-		return new BCryptPasswordEncoder();
-	}
+    @Bean
+    public BCryptPasswordEncoder bCryptPasswordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
 
 }
 

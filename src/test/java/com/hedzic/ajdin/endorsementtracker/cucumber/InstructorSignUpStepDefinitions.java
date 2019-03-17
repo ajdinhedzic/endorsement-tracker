@@ -1,6 +1,7 @@
 package com.hedzic.ajdin.endorsementtracker.cucumber;
 
 import com.hedzic.ajdin.endorsementtracker.entity.Pilot;
+import com.hedzic.ajdin.endorsementtracker.repository.FakeSendGrid;
 import com.hedzic.ajdin.endorsementtracker.repository.PilotRepository;
 import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
@@ -10,19 +11,21 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
 public class InstructorSignUpStepDefinitions extends CucumberIntegrationTest {
-
     @Autowired
     private MockMvc mockMvc;
     @Autowired
     private PilotRepository pilotRepository;
+    @Autowired
+    private FakeSendGrid sendGrid;
     private MockHttpServletResponse response;
 
     @When("^instructor signs up$")
     public void instructor_signs_up() throws Throwable {
-        response = requestWith("/api/signup", "admin");;
+        response = requestWith("/api/signup", "admin");
     }
 
     @Then("^there is a pilot profile created$")
@@ -59,5 +62,19 @@ public class InstructorSignUpStepDefinitions extends CucumberIntegrationTest {
                 .content("{\"email\":\"hello@hello.com\", \"password\":\"" + password + "\"}"))
                 .andReturn()
                 .getResponse();
+    }
+
+    @When("^the instructor forgets their password$")
+    public void theInstructorForgetsTheirPassword() throws Exception {
+        mockMvc.perform(post("/api/forgotPassword")
+                .contentType("application/json")
+                .content("{\"email\":\"hello@hello.com\"}"))
+                .andReturn()
+                .getResponse();
+    }
+
+    @Then("^a password reset email is sent$")
+    public void aPasswordResetEmailIsSent() {
+        assertEquals(1, sendGrid.getRequestList().size());
     }
 }

@@ -3,6 +3,7 @@ package com.hedzic.ajdin.endorsementtracker.entity;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.OneToOne;
 
 @Entity
 public class UserAccount {
@@ -13,6 +14,9 @@ public class UserAccount {
     private String email;
     private String password;
     private String salt;
+
+    @OneToOne
+    private UserPasswordReset userPasswordReset;
 
     protected UserAccount() {
     }
@@ -41,5 +45,13 @@ public class UserAccount {
 
     public String getSalt() {
         return salt;
+    }
+
+    public UserPasswordReset getUserPasswordReset() {
+        return userPasswordReset;
+    }
+
+    public void setUserPasswordReset(UserPasswordReset userPasswordReset) {
+        this.userPasswordReset = userPasswordReset;
     }
 }

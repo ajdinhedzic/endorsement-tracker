@@ -18,4 +18,12 @@ Feature: Instructor sign up
     When the instructor logs in with an incorrect password
     Then a 401 status is returned
 
+  Scenario: Reset password sends password reset email
+    Given an instructor is in the database
+    When the instructor forgets their password
+    Then a password reset email is sent
+
+
+
+
 

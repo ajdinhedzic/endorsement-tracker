@@ -32,7 +32,7 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
                 .headers().frameOptions().sameOrigin()
                 .and().csrf().disable().authorizeRequests()
                 .antMatchers("/**/*.{js,html,css}").permitAll()
-                .antMatchers(HttpMethod.POST, "/api/signup", "/h2-console/**").permitAll()
+                .antMatchers(HttpMethod.POST, "/api/signup", "/api/forgotPassword", "/h2-console/**").permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .addFilter(new JWTAuthenticationFilter(authenticationManager(), jwtEncryptionKey))

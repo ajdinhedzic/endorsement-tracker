@@ -3,7 +3,7 @@ spring:
     console:
       enabled: true
   profiles:
-    active: @spring.profiles.active@
+    active: testing
   jpa:
     generate-ddl: true
     hibernate:
@@ -12,5 +12,5 @@ application:
   jwt:
     secret: tempsecret
   sendgrid:
-    key: ${sendgrid.api.key}
-    password-reset-template-id: ${sendgrid.passwordreset.id}
+    key: not-needed
+    password-reset-template-id: templateid

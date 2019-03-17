@@ -4,4 +4,5 @@ public class SpringProfile {
 
     public static final String DEVELOPMENT = "development";
     public static final String PRODUCTION = "production";
+    public static final String TESTING = "testing";
 }

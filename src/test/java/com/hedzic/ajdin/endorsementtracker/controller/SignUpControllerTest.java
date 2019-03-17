@@ -81,6 +81,15 @@ public class SignUpControllerTest {
 
     }
 
+    @Test
+    public void forgotPasswordReturns200() throws Exception {
+        mockMvc.perform(post("/api/forgotPassword")
+                .contentType("application/json")
+                .content("{\"email\":\"hello@hello.com\"}"))
+                .andExpect(status().isOk());
+        verify(userDetailsService).requestForgottenPasswordEmailFor("hello@hello.com");
+    }
+
     private UserAuthentication createUserAuthentication() {
         UserAuthentication userAuthorization = new UserAuthentication();
         userAuthorization.setEmail("email@email");
