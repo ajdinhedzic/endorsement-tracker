@@ -27,8 +27,4 @@ public class FakeSendGrid extends SendGrid {
     public List<Request> getRequestList() {
         return requestList;
     }
-
-    public void setRequestList(List<Request> requestList) {
-        this.requestList = requestList;
-    }
 }

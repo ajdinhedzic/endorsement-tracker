@@ -12,6 +12,9 @@ public class UserPasswordReset {
     private String passwordResetToken;
     private LocalDateTime passwordResetExpirationDate;
 
+    @OneToOne
+    private UserAccount userAccount;
+
     public String getPasswordResetToken() {
         return passwordResetToken;
     }
@@ -26,5 +29,13 @@ public class UserPasswordReset {
 
     public void setPasswordResetExpirationDate(LocalDateTime passwordResetExpirationDate) {
         this.passwordResetExpirationDate = passwordResetExpirationDate;
+    }
+
+    public UserAccount getUserAccount() {
+        return userAccount;
+    }
+
+    public void setUserAccount(UserAccount userAccount) {
+        this.userAccount = userAccount;
     }
 }

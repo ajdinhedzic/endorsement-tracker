@@ -1,8 +1,8 @@
 package com.hedzic.ajdin.endorsementtracker.controller;
 
+import com.hedzic.ajdin.endorsementtracker.domain.UserAuthentication;
 import com.hedzic.ajdin.endorsementtracker.entity.Pilot;
 import com.hedzic.ajdin.endorsementtracker.entity.UserAccount;
-import com.hedzic.ajdin.endorsementtracker.domain.UserAuthentication;
 import com.hedzic.ajdin.endorsementtracker.service.UserDetailsServiceImpl;
 import org.junit.Before;
 import org.junit.Test;
@@ -18,8 +18,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -88,6 +87,34 @@ public class SignUpControllerTest {
                 .content("{\"email\":\"hello@hello.com\"}"))
                 .andExpect(status().isOk());
         verify(userDetailsService).requestForgottenPasswordEmailFor("hello@hello.com");
+    }
+
+    @Test
+    public void resetPasswordReturns200() throws Exception {
+        ArgumentCaptor<UserAccount> captor = ArgumentCaptor.forClass(UserAccount.class);
+        mockMvc.perform(post("/api/resetPassword")
+                .contentType("application/json")
+                .content("{\"email\":\"hello@hello.com\", \"password\":\"admin\", \"token\":\"abcd1234\"}"))
+                .andExpect(status().isOk());
+        verify(userDetailsService).resetPasswordFor(captor.capture(), eq("abcd1234"));
+    }
+
+    @Test
+    public void resetPasswordDoesNotCallUserDetailsServiceWhenEmailEmpty() throws Exception {
+        mockMvc.perform(post("/api/resetPassword")
+                .contentType("application/json")
+                .content("{\"email\":\"\", \"password\":\"password\"}"))
+                .andExpect(status().isBadRequest());
+        verifyZeroInteractions(userDetailsService);
+    }
+
+    @Test
+    public void resetPasswordDoesNotCallUserDetailsServiceWhenTokenEmpty() throws Exception {
+        mockMvc.perform(post("/api/resetPassword")
+                .contentType("application/json")
+                .content("{\"email\":\"hello@hello.com\", \"password\":\"admin\", \"token\":\"\"}"))
+                .andExpect(status().isBadRequest());
+        verifyZeroInteractions(userDetailsService);
     }
 
     private UserAuthentication createUserAuthentication() {

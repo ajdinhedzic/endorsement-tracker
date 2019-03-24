@@ -1,5 +1,6 @@
 package com.hedzic.ajdin.endorsementtracker.config;
 
+import com.hedzic.ajdin.endorsementtracker.repository.UserAccountRepository;
 import com.hedzic.ajdin.endorsementtracker.service.UserDetailsServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -11,6 +12,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -25,6 +27,9 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
     @Autowired
     private UserDetailsServiceImpl userDetailsService;
 
+    @Autowired
+    private BCryptPasswordEncoder passwordEncoder;
+
     @Override
     protected void configure(HttpSecurity httpSecurity) throws Exception {
         httpSecurity.cors()
@@ -32,7 +37,7 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
                 .headers().frameOptions().sameOrigin()
                 .and().csrf().disable().authorizeRequests()
                 .antMatchers("/**/*.{js,html,css}").permitAll()
-                .antMatchers(HttpMethod.POST, "/api/signup", "/api/forgotPassword", "/h2-console/**").permitAll()
+                .antMatchers(HttpMethod.POST, "/api/signup", "/api/forgotPassword", "/api/resetPassword", "/h2-console/**").permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .addFilter(new JWTAuthenticationFilter(authenticationManager(), jwtEncryptionKey))
@@ -42,7 +47,7 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
 
     @Override
     public void configure(AuthenticationManagerBuilder auth) throws Exception {
-        auth.userDetailsService(userDetailsService);
+        auth.userDetailsService(userDetailsService).passwordEncoder(passwordEncoder);
     }
 
     @Bean

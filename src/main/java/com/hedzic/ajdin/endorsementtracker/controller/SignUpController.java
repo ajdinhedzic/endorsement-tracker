@@ -12,6 +12,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
+import java.util.Arrays;
+
 import static org.springframework.http.HttpStatus.*;
 
 @Controller
@@ -21,11 +23,11 @@ public class SignUpController {
     private UserDetailsServiceImpl userDetailsServiceImpl;
 
     @PostMapping("/api/signup")
-    public ResponseEntity signup(@RequestBody UserAuthentication userAuthorization) {
-        if (userAuthorization.getEmail().isEmpty() || userAuthorization.getPassword().isEmpty()) {
+    public ResponseEntity signup(@RequestBody UserAuthentication signUpForm) {
+        if (requiredFieldsMissing(signUpForm.getEmail(), signUpForm.getPassword())) {
             return new ResponseEntity(HttpStatus.BAD_REQUEST);
         }
-        Pilot pilot = userDetailsServiceImpl.signUp(new UserAccount(userAuthorization.getEmail(), userAuthorization.getPassword()));
+        Pilot pilot = userDetailsServiceImpl.signUp(new UserAccount(signUpForm.getEmail(), signUpForm.getPassword()));
         return pilot == null ? new ResponseEntity(CONFLICT) : new ResponseEntity(CREATED);
     }
 
@@ -33,5 +35,18 @@ public class SignUpController {
     public ResponseEntity forgotPassword(@RequestBody UserEmail email) {
         userDetailsServiceImpl.requestForgottenPasswordEmailFor(email.getEmail());
         return new ResponseEntity(OK);
+    }
+
+    @PostMapping("/api/resetPassword")
+    public ResponseEntity resetPassword(@RequestBody UserAuthentication passwordResetForm) {
+        if (requiredFieldsMissing(passwordResetForm.getEmail(), passwordResetForm.getPassword(), passwordResetForm.getToken())) {
+            return new ResponseEntity(HttpStatus.BAD_REQUEST);
+        }
+        userDetailsServiceImpl.resetPasswordFor(new UserAccount(passwordResetForm.getEmail(), passwordResetForm.getPassword()), passwordResetForm.getToken());
+        return new ResponseEntity(OK);
+    }
+
+    private boolean requiredFieldsMissing(String... fieldsToCheck) {
+        return Arrays.asList(fieldsToCheck).contains("");
     }
 }

@@ -22,8 +22,3 @@ Feature: Instructor sign up
     Given an instructor is in the database
     When the instructor forgets their password
     Then a password reset email is sent
-
-
-
-
-

@@ -1,5 +1,8 @@
 package com.hedzic.ajdin.endorsementtracker.entity;
 
+import org.hibernate.annotations.Cascade;
+import org.hibernate.annotations.CascadeType;
+
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -13,22 +16,17 @@ public class UserAccount {
     private long id;
     private String email;
     private String password;
-    private String salt;
 
     @OneToOne
+    @Cascade(CascadeType.ALL)
     private UserPasswordReset userPasswordReset;
 
     protected UserAccount() {
     }
 
-    public UserAccount(String email, String password, String salt) {
+    public UserAccount(String email, String password) {
         this.email = email;
         this.password = password;
-        this.salt = salt;
-    }
-
-    public UserAccount(String email, String password) {
-        this(email, password, "");
     }
 
     public long getId() {
@@ -43,8 +41,8 @@ public class UserAccount {
         return password;
     }
 
-    public String getSalt() {
-        return salt;
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     public UserPasswordReset getUserPasswordReset() {

@@ -5,13 +5,11 @@ import com.hedzic.ajdin.endorsementtracker.entity.UserAccount;
 import com.hedzic.ajdin.endorsementtracker.entity.UserPasswordReset;
 import com.hedzic.ajdin.endorsementtracker.repository.PilotRepository;
 import com.hedzic.ajdin.endorsementtracker.repository.UserAccountRepository;
-import com.hedzic.ajdin.endorsementtracker.repository.UserPasswordResetRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -24,9 +22,6 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
     @Autowired
     private UserAccountRepository userAccountRepository;
-
-    @Autowired
-    private UserPasswordResetRepository userPasswordResetRepository;
 
     @Autowired
     private PilotRepository pilotRepository;
@@ -54,24 +49,41 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         if (user.isPresent()) {
             return null;
         }
-        String passwordSalt = BCrypt.gensalt();
         String encryptedPassword = passwordEncoder.encode(userAccount.getPassword());
-        UserAccount entity = new UserAccount(userAccount.getEmail(), encryptedPassword, passwordSalt);
+        UserAccount entity = new UserAccount(userAccount.getEmail(), encryptedPassword);
         UserAccount savedUserAccount = userAccountRepository.save(entity);
         return pilotRepository.save(new Pilot(savedUserAccount));
     }
 
     public void requestForgottenPasswordEmailFor(String email) {
         Optional<UserAccount> userAccount = Optional.ofNullable(userAccountRepository.findByEmail(email));
-        if(userAccount.isPresent()){
+        if (userAccount.isPresent()) {
             UserPasswordReset passwordReset = new UserPasswordReset();
             String passwordResetToken = UUID.randomUUID().toString();
             passwordReset.setPasswordResetToken(passwordResetToken);
             passwordReset.setPasswordResetExpirationDate(dateProvider.getCurrentTime().plusMinutes(15));
-            userPasswordResetRepository.save(passwordReset);
+            passwordReset.setUserAccount(userAccount.get());
             userAccount.get().setUserPasswordReset(passwordReset);
             userAccountRepository.save(userAccount.get());
             emailService.sendPasswordResetEmailTo(email, passwordResetToken);
         }
+    }
+
+    public void resetPasswordFor(UserAccount userAccount, String passwordResetToken) {
+        Optional<UserAccount> user = Optional.ofNullable(userAccountRepository.findByEmail(userAccount.getEmail()));
+        if (user.isPresent() && passwordResetTokenNotExpired(user) && passwordResetTokenMatches(passwordResetToken, user)) {
+            String encryptedPassword = passwordEncoder.encode(userAccount.getPassword());
+            user.get().setPassword(encryptedPassword);
+            user.get().setUserPasswordReset(null);
+            userAccountRepository.save(user.get());
+        }
+    }
+
+    private boolean passwordResetTokenNotExpired(Optional<UserAccount> user) {
+        return user.get().getUserPasswordReset().getPasswordResetExpirationDate().isAfter(dateProvider.getCurrentTime());
+    }
+
+    private boolean passwordResetTokenMatches(String passwordResetToken, Optional<UserAccount> user) {
+        return user.get().getUserPasswordReset().getPasswordResetToken().equals(passwordResetToken);
     }
 }

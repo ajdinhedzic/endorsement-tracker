@@ -5,7 +5,6 @@ import com.hedzic.ajdin.endorsementtracker.entity.UserAccount;
 import com.hedzic.ajdin.endorsementtracker.entity.UserPasswordReset;
 import com.hedzic.ajdin.endorsementtracker.repository.PilotRepository;
 import com.hedzic.ajdin.endorsementtracker.repository.UserAccountRepository;
-import com.hedzic.ajdin.endorsementtracker.repository.UserPasswordResetRepository;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -38,9 +37,6 @@ public class UserDetailsServiceImplTest {
     private PilotRepository pilotRepository;
 
     @Mock
-    private UserPasswordResetRepository userPasswordResetRepository;
-
-    @Mock
     private DateProvider dateProvider;
 
     @Mock
@@ -52,6 +48,10 @@ public class UserDetailsServiceImplTest {
     public void setUp() throws Exception {
         userAccount = new UserAccount("email@email", "1234");
         when(dateProvider.getCurrentTime()).thenReturn(LocalDateTime.now());
+        UserPasswordReset userPasswordReset = new UserPasswordReset();
+        userPasswordReset.setPasswordResetExpirationDate(dateProvider.getCurrentTime().plusMinutes(15));
+        userPasswordReset.setPasswordResetToken("validToken");
+        userAccount.setUserPasswordReset(userPasswordReset);
     }
 
     @Test
@@ -75,7 +75,7 @@ public class UserDetailsServiceImplTest {
 
     @Test
     public void signUpCallsSaveWithEncryptedPassword() throws Exception {
-        when(bCryptPasswordEncoder.encode(userAccount.getPassword())).thenReturn("encryptedPassword");
+        when(bCryptPasswordEncoder.encode(anyString())).thenReturn("encryptedPassword");
         userDetailsServiceImpl.signUp(userAccount);
         ArgumentCaptor<UserAccount> userAccountCaptor = ArgumentCaptor.forClass(UserAccount.class);
         verify(userAccountRepository).save(userAccountCaptor.capture());
@@ -116,33 +116,18 @@ public class UserDetailsServiceImplTest {
     }
 
     @Test
-    public void requestForgottenPasswordEmailforForSavesUniqueIdToUserAccountForResetLink() throws Exception {
-        when(userAccountRepository.findByEmail(anyString())).thenReturn(userAccount);
-        LocalDateTime currentTime = LocalDateTime.now();
-        when(dateProvider.getCurrentTime()).thenReturn(currentTime);
-        userDetailsServiceImpl.requestForgottenPasswordEmailFor("hello@hello.com");
-        ArgumentCaptor<UserPasswordReset> captor = ArgumentCaptor.forClass(UserPasswordReset.class);
-        verify(userPasswordResetRepository).save(captor.capture());
-        assertEquals(36, captor.getValue().getPasswordResetToken().length());
-        assertEquals(currentTime.plusMinutes(15), captor.getValue().getPasswordResetExpirationDate());
-    }
-
-    @Test
     public void requestForgottenPasswordEmailforForSavesPasswordResetToUserAccount() throws Exception {
         when(userAccountRepository.findByEmail(anyString())).thenReturn(userAccount);
         userDetailsServiceImpl.requestForgottenPasswordEmailFor("hello@hello.com");
         ArgumentCaptor<UserAccount> captor = ArgumentCaptor.forClass(UserAccount.class);
-        ArgumentCaptor<UserPasswordReset> passwordResetCaptor = ArgumentCaptor.forClass(UserPasswordReset.class);
         verify(userAccountRepository).save(captor.capture());
-        verify(userPasswordResetRepository).save(passwordResetCaptor.capture());
-        assertEquals(passwordResetCaptor.getValue(), captor.getValue().getUserPasswordReset());
+        assertEquals(userAccount, captor.getValue().getUserPasswordReset().getUserAccount());
     }
 
     @Test
     public void requestForgottenPasswordEmailforDoesNothingWhenUserDoesNotExist() throws Exception {
         userDetailsServiceImpl.requestForgottenPasswordEmailFor("hello@hello.com");
         verify(userAccountRepository, times(0)).save(any(UserAccount.class));
-        verify(userPasswordResetRepository, times(0)).save(any(UserPasswordReset.class));
     }
 
     @Test
@@ -150,5 +135,36 @@ public class UserDetailsServiceImplTest {
         when(userAccountRepository.findByEmail(anyString())).thenReturn(userAccount);
         userDetailsServiceImpl.requestForgottenPasswordEmailFor("hello@hello.com");
         verify(emailService).sendPasswordResetEmailTo(eq("hello@hello.com"), anyString());
+    }
+
+    @Test
+    public void resetPasswordForUpdatesPasswordForExistingUserAccount() throws Exception {
+        when(userAccountRepository.findByEmail(anyString())).thenReturn(userAccount);
+        when(bCryptPasswordEncoder.encode(anyString())).thenReturn("encryptedPassword");
+        userDetailsServiceImpl.resetPasswordFor(userAccount, "validToken");
+        ArgumentCaptor<UserAccount> captor = ArgumentCaptor.forClass(UserAccount.class);
+        verify(userAccountRepository).save(captor.capture());
+        assertEquals("encryptedPassword", captor.getValue().getPassword());
+    }
+
+    @Test
+    public void resetPasswordDoesNothingAfterPasswordExpirationTime() throws Exception {
+        UserPasswordReset userPasswordReset = new UserPasswordReset();
+        userPasswordReset.setPasswordResetExpirationDate(dateProvider.getCurrentTime().minusMinutes(1));
+        userAccount.setUserPasswordReset(userPasswordReset);
+        when(userAccountRepository.findByEmail(anyString())).thenReturn(userAccount);
+        userDetailsServiceImpl.resetPasswordFor(userAccount, "validToken");
+        verify(userAccountRepository, times(0)).save(any(UserAccount.class));
+    }
+
+    @Test
+    public void resetPasswordDoesNothingWhenPasswordExpirationTokensDoNotMatch() throws Exception {
+        UserPasswordReset userPasswordReset = new UserPasswordReset();
+        userPasswordReset.setPasswordResetExpirationDate(dateProvider.getCurrentTime().plusMinutes(15));
+        userPasswordReset.setPasswordResetToken("validToken");
+        userAccount.setUserPasswordReset(userPasswordReset);
+        when(userAccountRepository.findByEmail(anyString())).thenReturn(userAccount);
+        userDetailsServiceImpl.resetPasswordFor(userAccount, "not a valid token");
+        verify(userAccountRepository, times(0)).save(any(UserAccount.class));
     }
 }

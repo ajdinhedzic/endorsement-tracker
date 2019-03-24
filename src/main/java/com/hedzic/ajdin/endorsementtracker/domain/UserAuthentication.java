@@ -1,8 +1,12 @@
 package com.hedzic.ajdin.endorsementtracker.domain;
 
+import org.springframework.lang.Nullable;
+
 public class UserAuthentication {
     private String email;
     private String password;
+    @Nullable
+    private String token;
 
     public UserAuthentication() {
     }
@@ -21,5 +25,13 @@ public class UserAuthentication {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
     }
 }

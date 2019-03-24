@@ -11,7 +11,6 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
 public class InstructorSignUpStepDefinitions extends CucumberIntegrationTest {
@@ -66,7 +65,7 @@ public class InstructorSignUpStepDefinitions extends CucumberIntegrationTest {
 
     @When("^the instructor forgets their password$")
     public void theInstructorForgetsTheirPassword() throws Exception {
-        mockMvc.perform(post("/api/forgotPassword")
+        response = mockMvc.perform(post("/api/forgotPassword")
                 .contentType("application/json")
                 .content("{\"email\":\"hello@hello.com\"}"))
                 .andReturn()

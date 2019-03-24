@@ -12,5 +12,5 @@ application:
   jwt:
     secret: tempsecret
   sendgrid:
-    key: ${sendgrid.api.key}
-    password-reset-template-id: ${sendgrid.passwordreset.id}
+    key:
+    password-reset-template-id:
